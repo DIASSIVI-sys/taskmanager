@@ -1,4 +1,10 @@
-<h1>Mes tâches</h1>
+<div class="header">
+  <h1>Mes tâches</h1>
+  <button mat-flat-button (click)="openForm()">
+    <mat-icon>add</mat-icon>
+    Nouvelle tâche
+  </button>
+</div>
 
 @if (loading()) {
   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -17,14 +23,29 @@
     <mat-card>
       <mat-card-header>
         <mat-card-title>{{ task.title }}</mat-card-title>
-        <mat-card-subtitle>
-          {{ statusLabels[task.status] }} · Priorité {{ priorityLabels[task.priority] }}
-        </mat-card-subtitle>
+        <mat-card-subtitle>Priorité {{ priorityLabels[task.priority] }}</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <p>{{ task.description }}</p>
         <small>Créée le {{ task.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+
+        <mat-form-field appearance="outline" class="status-field">
+          <mat-label>Statut</mat-label>
+          <mat-select [value]="task.status" (selectionChange)="changeStatus(task, $event.value)">
+            @for (s of statuses; track s) {
+              <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-icon-button aria-label="Modifier" (click)="openForm(task)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button aria-label="Supprimer" (click)="deleteTask(task)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-actions>
     </mat-card>
   }
 </div>
