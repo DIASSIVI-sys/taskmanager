@@ -1,0 +1,30 @@
+<h1>Mes tâches</h1>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+
+@if (errorMessage()) {
+  <p class="error">{{ errorMessage() }}</p>
+}
+
+@if (!loading() && !errorMessage() && tasks().length === 0) {
+  <p>Aucune tâche pour le moment.</p>
+}
+
+<div class="task-grid">
+  @for (task of tasks(); track task.id) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ task.title }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ statusLabels[task.status] }} · Priorité {{ priorityLabels[task.priority] }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ task.description }}</p>
+        <small>Créée le {{ task.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
