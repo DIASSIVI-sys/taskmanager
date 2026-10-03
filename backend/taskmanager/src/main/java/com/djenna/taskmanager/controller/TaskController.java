@@ -1,6 +1,7 @@
 package com.djenna.taskmanager.controller;
 
 import com.djenna.taskmanager.dto.StatusUpdateRequest;
+import com.djenna.taskmanager.dto.PageResponse;
 import com.djenna.taskmanager.dto.TaskRequest;
 import com.djenna.taskmanager.dto.TaskResponse;
 import com.djenna.taskmanager.entity.TaskPriority;
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -33,10 +32,12 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> list(@RequestParam(required = false) String search,
-                                   @RequestParam(required = false) TaskStatus status,
-                                   @RequestParam(required = false) TaskPriority priority) {
-        return service.findAll(search, status, priority);
+    public PageResponse<TaskResponse> list(@RequestParam(required = false) String search,
+                                           @RequestParam(required = false) TaskStatus status,
+                                           @RequestParam(required = false) TaskPriority priority,
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size) {
+        return service.findAll(search, status, priority, page, size);
     }
 
     @GetMapping("/{id}")

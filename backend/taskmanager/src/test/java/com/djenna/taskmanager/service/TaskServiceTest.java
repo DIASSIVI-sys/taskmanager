@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.djenna.taskmanager.dto.TaskRequest;
+import com.djenna.taskmanager.dto.PageResponse;
 import com.djenna.taskmanager.dto.TaskResponse;
 import com.djenna.taskmanager.entity.Task;
 import com.djenna.taskmanager.entity.TaskPriority;
@@ -25,6 +26,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -123,12 +126,19 @@ class TaskServiceTest {
     }
 
     @Test
-    void findAll_mapsEntitiesToResponses() {
-        when(repository.findAll(ArgumentMatchers.<Specification<Task>>any(), any(Sort.class)))
-                .thenReturn(List.of(buildTask("A"), buildTask("B")));
+    void findAll_mapsEntitiesToResponsesAndReturnsPageMetadata() {
+        when(repository.findAll(ArgumentMatchers.<Specification<Task>>any(),
+                ArgumentMatchers.<org.springframework.data.domain.Pageable>any()))
+                .thenReturn(new PageImpl<>(List.of(buildTask("A"), buildTask("B")),
+                        PageRequest.of(0, 10), 12));
 
-        List<TaskResponse> result = service.findAll("a", TaskStatus.TODO, null);
+        PageResponse<TaskResponse> result = service.findAll("a", TaskStatus.TODO, null, 0, 10);
 
-        assertThat(result).extracting(TaskResponse::title).containsExactly("A", "B");
+        assertThat(result.content()).extracting(TaskResponse::title).containsExactly("A", "B");
+        assertThat(result.totalElements()).isEqualTo(12);
+        verify(repository).findAll(ArgumentMatchers.<Specification<Task>>any(),
+                ArgumentMatchers.eq(PageRequest.of(0, 10, Sort.by(
+                        Sort.Order.desc("createdAt"),
+                        Sort.Order.desc("id")))));
     }
 }

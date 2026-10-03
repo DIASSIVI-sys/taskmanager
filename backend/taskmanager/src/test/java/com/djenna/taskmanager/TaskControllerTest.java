@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.djenna.taskmanager.dto.PageResponse;
 import com.djenna.taskmanager.dto.TaskResponse;
 import com.djenna.taskmanager.entity.TaskPriority;
 import com.djenna.taskmanager.entity.TaskStatus;
@@ -54,12 +55,14 @@ class TaskControllerTest {
 
     @Test
     void list_returns200WithTasks() throws Exception {
-        when(service.findAll(null, null, null)).thenReturn(List.of(sample()));
+        when(service.findAll(null, null, null, 0, 10))
+                .thenReturn(new PageResponse<>(List.of(sample()), 0, 10, 1, 1));
 
         mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Ma tache"))
-                .andExpect(jsonPath("$[0].priority").value("HIGH"));
+                .andExpect(jsonPath("$.content[0].title").value("Ma tache"))
+                .andExpect(jsonPath("$.content[0].priority").value("HIGH"))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test

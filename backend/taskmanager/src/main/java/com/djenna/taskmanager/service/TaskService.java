@@ -1,18 +1,19 @@
 package com.djenna.taskmanager.service;
 
 import com.djenna.taskmanager.dto.TaskRequest;
+import com.djenna.taskmanager.dto.PageResponse;
 import com.djenna.taskmanager.dto.TaskResponse;
 import com.djenna.taskmanager.entity.Task;
 import com.djenna.taskmanager.entity.TaskPriority;
 import com.djenna.taskmanager.entity.TaskStatus;
 import com.djenna.taskmanager.exception.TaskNotFoundException;
 import com.djenna.taskmanager.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,25 +25,29 @@ public class TaskService {
         this.repository = repository;
     }
 
-    public List<TaskResponse> findAll(String search, TaskStatus status, TaskPriority priority) {
-    Specification<Task> spec = (root, query, cb) -> cb.conjunction();
+    public PageResponse<TaskResponse> findAll(
+            String search, TaskStatus status, TaskPriority priority, int page, int size) {
+        Specification<Task> spec = (root, query, cb) -> cb.conjunction();
 
-    if (search != null && !search.isBlank()) {
-        spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("title")), "%" + search.toLowerCase() + "%"));
-    }
-    if (status != null) {
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
-    }
-    if (priority != null) {
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("priority"), priority));
-    }
+        if (search != null && !search.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("title")), "%" + search.toLowerCase() + "%"));
+        }
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+        if (priority != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("priority"), priority));
+        }
 
-    return repository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"))
-            .stream()
-            .map(TaskResponse::from)
-            .toList();
-}
+        int boundedPage = Math.max(0, page);
+        int boundedSize = Math.clamp(size, 1, 100);
+        Sort sort = Sort.by(
+                Sort.Order.desc("createdAt"),
+                Sort.Order.desc("id"));
+        Page<Task> result = repository.findAll(spec, PageRequest.of(boundedPage, boundedSize, sort));
+        return PageResponse.from(result.map(TaskResponse::from));
+    }
 
     public TaskResponse findById(Long id) {
         return TaskResponse.from(getOrThrow(id));
