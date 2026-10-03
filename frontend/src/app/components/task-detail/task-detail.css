@@ -1,0 +1,15 @@
+.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  min-width: min(380px, 80vw);
+}
+
+dt {
+  font-weight: 500;
+}
+
+dd {
+  margin: 0;
+  white-space: pre-wrap;
+}

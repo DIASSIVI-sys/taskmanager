@@ -12,6 +12,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TaskDetail } from '../task-detail/task-detail';
 import {
   PRIORITY_LABELS,
   STATUS_LABELS,
@@ -99,6 +100,9 @@ export class TaskList implements OnInit {
         },
       });
   }
+  openDetail(task: Task): void {
+      this.dialog.open(TaskDetail, { data: task, width: '500px', maxWidth: '95vw' });
+    } 
 
   openForm(task?: Task): void {
     this.dialog
