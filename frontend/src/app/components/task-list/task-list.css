@@ -21,3 +21,14 @@
 .error {
   color: #b00020;
 }
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.search-field {
+  flex: 1 1 240px;
+}

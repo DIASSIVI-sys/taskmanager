@@ -6,6 +6,35 @@
   </button>
 </div>
 
+<div class="filters">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Rechercher par titre</mat-label>
+    <input matInput [formControl]="searchControl" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Statut</mat-label>
+    <mat-select [formControl]="statusFilter">
+      <mat-option value="">Tous</mat-option>
+      @for (s of statuses; track s) {
+        <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Priorité</mat-label>
+    <mat-select [formControl]="priorityFilter">
+      <mat-option value="">Toutes</mat-option>
+      @for (p of priorities; track p) {
+        <mat-option [value]="p">{{ priorityLabels[p] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-button (click)="resetFilters()">Réinitialiser</button>
+</div>
 @if (loading()) {
   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
 }
@@ -15,7 +44,7 @@
 }
 
 @if (!loading() && !errorMessage() && tasks().length === 0) {
-  <p>Aucune tâche pour le moment.</p>
+  <p>Aucune tâche ne correspond.</p>
 }
 
 <div class="task-grid">
