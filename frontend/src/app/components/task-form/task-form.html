@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier la tâche' : 'Nouvelle tâche' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Titre</mat-label>
+      <input matInput formControlName="title" maxlength="150" />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Le titre est obligatoire</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3" maxlength="1000"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="status">
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Priorité</mat-label>
+      <mat-select formControlName="priority">
+        @for (p of priorities; track p) {
+          <mat-option [value]="p">{{ priorityLabels[p] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-flat-button (click)="save()">Enregistrer</button>
+</mat-dialog-actions>
