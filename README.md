@@ -7,6 +7,7 @@ Réalisée dans le cadre d'un test technique Développeur Full Stack Java / Angu
 ## Fonctionnalités
 
 - Liste des tâches avec états de chargement et messages d'erreur
+- Pagination côté serveur de la liste des tâches
 - Création, modification, suppression
 - Consultation du détail d'une tâche
 - Changement de statut directement depuis la liste
@@ -125,7 +126,7 @@ Ouvrir ensuite http://localhost:4200. Le backend doit être démarré, et l'appl
 
 | Méthode | URL | Description | Codes |
 |---|---|---|---|
-| GET | `/api/tasks` | Liste (filtres `search`, `status`, `priority`, optionnels) | 200 |
+| GET | `/api/tasks` | Liste paginée (filtres `search`, `status`, `priority`, `page`, `size`, optionnels) | 200 |
 | GET | `/api/tasks/{id}` | Détail d'une tâche | 200, 404 |
 | POST | `/api/tasks` | Création | 201, 400 |
 | PUT | `/api/tasks/{id}` | Modification complète | 200, 400, 404 |
@@ -143,7 +144,9 @@ Exemple de corps pour `POST` / `PUT` :
 }
 ```
 
-Exemple de filtre : `GET /api/tasks?search=démo&status=TODO&priority=HIGH`
+Exemple de requête : `GET /api/tasks?search=démo&status=TODO&priority=HIGH&page=0&size=10`
+
+La liste renvoie `content`, `page`, `size`, `totalElements` et `totalPages`. Les paramètres de pagination ont pour défaut `page=0` et `size=10` ; la taille est limitée à 100.
 
 Format des erreurs :
 
@@ -194,7 +197,6 @@ Tests Vitest : service HTTP (`HttpTestingController`), formulaire (validation, d
 ## Améliorations possibles
 
 - Migrations avec Flyway ou Liquibase à la place de `ddl-auto: update`
-- Pagination et tri des tâches
 - Authentification utilisateur
 - Documentation Swagger/OpenAPI
 - Dockerisation complète (Backend + Frontend dans le Docker Compose)
