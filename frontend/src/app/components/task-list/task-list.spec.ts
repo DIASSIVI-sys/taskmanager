@@ -31,8 +31,16 @@ describe('TaskApi', () => {
   });
 
   it('getAll envoie les filtres en paramètres de requête', () => {
-    service.getAll({ search: 'abc', status: 'TODO', priority: 'HIGH' }).subscribe((tasks) => {
-      expect(tasks).toEqual([sampleTask]);
+    const response = {
+      content: [sampleTask],
+      page: 1,
+      size: 5,
+      totalElements: 21,
+      totalPages: 5,
+    };
+
+    service.getAll({ search: 'abc', status: 'TODO', priority: 'HIGH', page: 1, size: 5 }).subscribe((result) => {
+      expect(result).toEqual(response);
     });
 
     const req = httpMock.expectOne((r) => r.url === baseUrl);
@@ -40,15 +48,21 @@ describe('TaskApi', () => {
     expect(req.request.params.get('search')).toBe('abc');
     expect(req.request.params.get('status')).toBe('TODO');
     expect(req.request.params.get('priority')).toBe('HIGH');
-    req.flush([sampleTask]);
+    expect(req.request.params.get('page')).toBe('1');
+    expect(req.request.params.get('size')).toBe('5');
+    req.flush(response);
   });
 
   it('getAll n envoie pas les filtres vides', () => {
     service.getAll({ search: '', status: '', priority: '' }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url === baseUrl);
-    expect(req.request.params.keys().length).toBe(0);
-    req.flush([]);
+    expect(req.request.params.has('search')).toBe(false);
+    expect(req.request.params.has('status')).toBe(false);
+    expect(req.request.params.has('priority')).toBe(false);
+    expect(req.request.params.get('page')).toBe('0');
+    expect(req.request.params.get('size')).toBe('10');
+    req.flush({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 });
   });
 
   it('create envoie un POST avec le corps de la tâche', () => {

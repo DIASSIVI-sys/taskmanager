@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -34,6 +35,7 @@ import { TaskForm } from '../task-form/task-form';
     MatIconModule,
     MatInputModule,
     MatProgressBarModule,
+    MatPaginatorModule,
     MatSelectModule,
     ReactiveFormsModule,
   ],
@@ -48,6 +50,9 @@ export class TaskList implements OnInit {
   readonly tasks = signal<Task[]>([]);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly totalElements = signal(0);
+  readonly pageIndex = signal(0);
+  readonly pageSize = signal(10);
 
   readonly statusLabels = STATUS_LABELS;
   readonly priorityLabels = PRIORITY_LABELS;
@@ -63,23 +68,35 @@ export class TaskList implements OnInit {
     // La recherche attend 300 ms après la dernière frappe avant d'appeler l'API
     this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadTasks());
+      .subscribe(() => this.applyFilters());
 
-    this.statusFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.loadTasks());
-    this.priorityFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.loadTasks());
+    this.statusFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.applyFilters());
+    this.priorityFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.applyFilters());
+  }
+
+  applyFilters(): void {
+    this.pageIndex.set(0);
+    this.loadTasks();
   }
 
   resetFilters(): void {
     this.searchControl.setValue('', { emitEvent: false });
     this.statusFilter.setValue('', { emitEvent: false });
     this.priorityFilter.setValue('', { emitEvent: false });
-    this.loadTasks();
+    this.applyFilters();
   }
+
   ngOnInit(): void {
     this.loadTasks();
   }
 
-   loadTasks(): void {
+  onPage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+    this.loadTasks();
+  }
+
+  loadTasks(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
 
@@ -88,10 +105,13 @@ export class TaskList implements OnInit {
         search: this.searchControl.value.trim(),
         status: this.statusFilter.value,
         priority: this.priorityFilter.value,
+        page: this.pageIndex(),
+        size: this.pageSize(),
       })
       .subscribe({
-        next: (tasks) => {
-          this.tasks.set(tasks);
+        next: (result) => {
+          this.tasks.set(result.content);
+          this.totalElements.set(result.totalElements);
           this.loading.set(false);
         },
         error: () => {
@@ -122,6 +142,7 @@ export class TaskList implements OnInit {
         call.subscribe({
           next: () => {
             this.notify(task ? 'Tâche modifiée' : 'Tâche créée');
+            if (!task) this.pageIndex.set(0);
             this.loadTasks();
           },
           error: () => this.notify("L'enregistrement a échoué"),
@@ -145,7 +166,11 @@ export class TaskList implements OnInit {
     this.taskApi.delete(task.id).subscribe({
       next: () => {
         this.tasks.update((list) => list.filter((t) => t.id !== task.id));
+        if (this.tasks().length === 0 && this.pageIndex() > 0) {
+          this.pageIndex.update((page) => page - 1);
+        }
         this.notify('Tâche supprimée');
+        this.loadTasks();
       },
       error: () => this.notify('La suppression a échoué'),
     });

@@ -1,12 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Task, TaskPriority, TaskRequest, TaskStatus } from '../models/task.model';
+import { PageResponse, Task, TaskPriority, TaskRequest, TaskStatus } from '../models/task.model';
 
 export interface TaskFilters {
   search?: string;
   status?: TaskStatus | '';
   priority?: TaskPriority | '';
+  page?: number;
+  size?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -14,12 +16,13 @@ export class TaskApi {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'http://localhost:8080/api/tasks';
 
-  getAll(filters: TaskFilters = {}): Observable<Task[]> {
+  getAll(filters: TaskFilters = {}): Observable<PageResponse<Task>> {
     let params = new HttpParams();
+    params = params.set('page', filters.page ?? 0).set('size', filters.size ?? 10);
     if (filters.search) params = params.set('search', filters.search);
     if (filters.status) params = params.set('status', filters.status);
     if (filters.priority) params = params.set('priority', filters.priority);
-    return this.http.get<Task[]>(this.baseUrl, { params });
+    return this.http.get<PageResponse<Task>>(this.baseUrl, { params });
   }
 
   getById(id: number): Observable<Task> {

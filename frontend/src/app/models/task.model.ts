@@ -10,6 +10,14 @@ export interface Task {
   createdAt: string;
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 // Ce que le formulaire envoie à l'API (pas d'id ni de createdAt)
 export interface TaskRequest {
   title: string;
