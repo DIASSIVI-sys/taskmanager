@@ -1,1 +1,109 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.task-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  white-space: nowrap;
+}
+
+.task-badge mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.status-done {
+  color: var(--mat-sys-on-tertiary-container);
+  background: color-mix(in srgb, var(--mat-sys-tertiary-container) 78%, var(--mat-sys-surface));
+}
+
+.status-in-progress {
+  color: var(--mat-sys-on-secondary-container);
+  background: color-mix(in srgb, var(--mat-sys-secondary-container) 78%, var(--mat-sys-surface));
+}
+
+.priority-low {
+  color: oklch(from var(--mat-sys-on-tertiary-container) l c 145);
+  background: color-mix(
+    in srgb,
+    oklch(from var(--mat-sys-tertiary-container) l c 145) 78%,
+    var(--mat-sys-surface)
+  );
+}
+
+.priority-medium {
+  color: oklch(from var(--mat-sys-on-secondary-container) l c 55);
+  background: color-mix(
+    in srgb,
+    oklch(from var(--mat-sys-secondary-container) l c 55) 78%,
+    var(--mat-sys-surface)
+  );
+}
+
+.priority-high {
+  color: var(--mat-sys-on-error-container);
+  background: color-mix(in srgb, var(--mat-sys-error-container) 78%, var(--mat-sys-surface));
+}
+
+.status-todo {
+  color: var(--mat-sys-on-primary-container);
+  background: color-mix(in srgb, var(--mat-sys-primary-container) 78%, var(--mat-sys-surface));
+}
+
+.mat-mdc-paginator {
+  margin-top: 24px;
+  border-radius: 16px;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.mat-mdc-snack-bar-container.task-notification-panel {
+  --mdc-snackbar-container-color: transparent;
+  --mat-snack-bar-container-color: transparent;
+  --mat-snack-bar-supporting-text-color: transparent;
+  padding: 0;
+}
+
+.mat-mdc-snack-bar-container.task-notification-panel .mdc-snackbar__surface {
+  padding: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mat-mdc-snack-bar-container.task-notification-panel .mat-mdc-snack-bar-label {
+  padding: 0;
+}
+
+@media (max-width: 599px) {
+  .mat-mdc-snack-bar-container.task-notification-panel {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin: 0 auto;
+  }
+}

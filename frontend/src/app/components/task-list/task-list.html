@@ -1,89 +1,157 @@
-<div class="header">
-  <h1>Mes tâches</h1>
-  <button mat-flat-button (click)="openForm()">
+<header class="page-header">
+  <div>
+    <h1>Mes tâches</h1>
+    <p class="page-subtitle">
+      {{ totalElements() }} {{ totalElements() === 1 ? 'tâche au total' : 'tâches au total' }}
+    </p>
+  </div>
+  <button mat-flat-button class="new-task-button" (click)="openForm()">
     <mat-icon>add</mat-icon>
     Nouvelle tâche
   </button>
+</header>
+
+<div class="loading-track" aria-hidden="true">
+  <mat-progress-bar mode="indeterminate" [class.is-loading]="loading()"></mat-progress-bar>
 </div>
 
-<div class="filters">
-  <mat-form-field appearance="outline" class="search-field">
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
     <mat-label>Rechercher par titre</mat-label>
     <input matInput [formControl]="searchControl" />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Statut</mat-label>
-    <mat-select [formControl]="statusFilter">
-      <mat-option value="">Tous</mat-option>
-      @for (s of statuses; track s) {
-        <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <div class="filters" role="group" aria-label="Filtres">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Statut</mat-label>
+      <mat-select [formControl]="statusFilter">
+        <mat-option value="">Tous</mat-option>
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Priorité</mat-label>
-    <mat-select [formControl]="priorityFilter">
-      <mat-option value="">Toutes</mat-option>
-      @for (p of priorities; track p) {
-        <mat-option [value]="p">{{ priorityLabels[p] }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Priorité</mat-label>
+      <mat-select [formControl]="priorityFilter">
+        <mat-option value="">Toutes</mat-option>
+        @for (p of priorities; track p) {
+          <mat-option [value]="p">{{ priorityLabels[p] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-  <button mat-button (click)="resetFilters()">Réinitialiser</button>
+    @if (hasActiveFilters) {
+      <button
+        mat-icon-button
+        class="reset-button"
+        aria-label="Réinitialiser les filtres"
+        matTooltip="Réinitialiser les filtres"
+        (click)="resetFilters()"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    }
+  </div>
 </div>
-@if (loading()) {
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-}
 
 @if (errorMessage()) {
-  <p class="error">{{ errorMessage() }}</p>
+  <section class="state-panel error-panel" role="alert">
+    <mat-icon>cloud_off</mat-icon>
+    <div>
+      <h2>Impossible de charger les tâches</h2>
+      <p>{{ errorMessage() }}</p>
+    </div>
+    <button mat-stroked-button (click)="loadTasks()">Réessayer</button>
+  </section>
 }
 
 @if (!loading() && !errorMessage() && tasks().length === 0) {
-  <p>Aucune tâche ne correspond.</p>
+  <section class="state-panel empty-panel">
+    <span class="empty-icon"><mat-icon>task_alt</mat-icon></span>
+    <h2>{{ hasActiveFilters ? 'Aucun résultat pour ces filtres' : 'Aucune tâche' }}</h2>
+    <p>
+      {{
+        hasActiveFilters
+          ? 'Essayez de modifier vos critères ou réinitialisez les filtres.'
+          : 'Créez votre première tâche pour commencer.'
+      }}
+    </p>
+    @if (hasActiveFilters) {
+      <button mat-button (click)="resetFilters()">Réinitialiser les filtres</button>
+    } @else {
+      <button mat-flat-button (click)="openForm()">
+        <mat-icon>add</mat-icon>
+        Créer une tâche
+      </button>
+    }
+  </section>
 }
 
 <div class="task-grid">
   @for (task of tasks(); track task.id) {
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>{{ task.title }}</mat-card-title>
-        <mat-card-subtitle>Priorité {{ priorityLabels[task.priority] }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ task.description }}</p>
-        <small>Créée le {{ task.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+    <mat-card class="task-card" [class.task-complete]="task.status === 'DONE'">
+      <mat-card-content class="task-card-content">
+        <div class="card-heading">
+          <h2 class="task-title" [title]="task.title">{{ task.title }}</h2>
+          <span class="task-badge" [class.priority-low]="task.priority === 'LOW'"
+            [class.priority-medium]="task.priority === 'MEDIUM'"
+            [class.priority-high]="task.priority === 'HIGH'">
+            {{ priorityLabels[task.priority] }}
+          </span>
+        </div>
 
-        <mat-form-field appearance="outline" class="status-field">
-          <mat-label>Statut</mat-label>
-          <mat-select [value]="task.status" (selectionChange)="changeStatus(task, $event.value)">
+        <p class="task-description">{{ task.description || 'Aucune description' }}</p>
+        <small class="task-date">Créée le {{ task.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+
+        <div class="card-footer">
+          <button
+            mat-button
+            class="status-trigger"
+            [matMenuTriggerFor]="statusMenu"
+            [attr.aria-label]="'Modifier le statut : ' + statusLabels[task.status]"
+            matTooltip="Modifier le statut"
+          >
+            <span class="task-badge" [class.status-todo]="task.status === 'TODO'"
+              [class.status-in-progress]="task.status === 'IN_PROGRESS'"
+              [class.status-done]="task.status === 'DONE'">
+              <mat-icon>{{ statusIcon(task.status) }}</mat-icon>
+              {{ statusLabels[task.status] }}
+            </span>
+            <mat-icon class="expand-icon">expand_more</mat-icon>
+          </button>
+          <mat-menu #statusMenu="matMenu">
             @for (s of statuses; track s) {
-              <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+              <button mat-menu-item (click)="changeStatus(task, s)">
+                <mat-icon>{{ statusIcon(s) }}</mat-icon>
+                <span>{{ statusLabels[s] }}</span>
+              </button>
             }
-          </mat-select>
-        </mat-form-field>
+          </mat-menu>
+        </div>
       </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-icon-button aria-label="Modifier" (click)="openForm(task)">
+      <mat-card-actions class="task-actions">
+        <button mat-icon-button aria-label="Voir les détails" matTooltip="Détails" (click)="openDetail(task)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button aria-label="Modifier la tâche" matTooltip="Modifier" (click)="openForm(task)">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button aria-label="Supprimer" (click)="deleteTask(task)">
+        <button mat-icon-button class="delete-action" aria-label="Supprimer la tâche" matTooltip="Supprimer" (click)="deleteTask(task)">
           <mat-icon>delete</mat-icon>
         </button>
-
-        <button mat-button (click)="openDetail(task)">Détails</button>
       </mat-card-actions>
     </mat-card>
   }
 </div>
-<mat-paginator
-  [length]="totalElements()"
-  [pageIndex]="pageIndex()"
-  [pageSize]="pageSize()"
-  [pageSizeOptions]="[5, 10, 25]"
-  (page)="onPage($event)"
-></mat-paginator>
+@if (totalElements() > 0 && !errorMessage()) {
+  <mat-paginator
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 25]"
+    (page)="onPage($event)"
+  ></mat-paginator>
+}

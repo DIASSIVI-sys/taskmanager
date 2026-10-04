@@ -1,7 +1,22 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: min(400px, 80vw);
-  padding-top: 8px;
+  gap: 8px;
+  min-width: min(440px, 80vw);
+  padding-top: 12px;
+}
+
+.form mat-form-field {
+  width: 100%;
+}
+
+.form-actions {
+  gap: 8px;
+  padding: 8px 24px 20px;
+}
+
+@media (max-width: 480px) {
+  .form {
+    min-width: 0;
+  }
 }

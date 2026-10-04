@@ -5,10 +5,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -23,7 +24,9 @@ import {
   TaskStatus,
 } from '../../models/task.model';
 import { TaskApi } from '../../services/task-api';
+import { NotificationService } from '../../services/notification-service';
 import { TaskForm } from '../task-form/task-form';
+import { ConfirmDialog, ConfirmDialogData } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-task-list',
@@ -33,10 +36,12 @@ import { TaskForm } from '../task-form/task-form';
     MatCardModule,
     MatFormFieldModule,
     MatIconModule,
+    MatMenuModule,
     MatInputModule,
     MatProgressBarModule,
     MatPaginatorModule,
     MatSelectModule,
+    MatTooltipModule,
     ReactiveFormsModule,
   ],
   templateUrl: './task-list.html',
@@ -45,7 +50,7 @@ import { TaskForm } from '../task-form/task-form';
 export class TaskList implements OnInit {
   private readonly taskApi = inject(TaskApi);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notifications = inject(NotificationService);
 
   readonly tasks = signal<Task[]>([]);
   readonly loading = signal(false);
@@ -63,6 +68,12 @@ export class TaskList implements OnInit {
   readonly searchControl = new FormControl('', { nonNullable: true });
   readonly statusFilter = new FormControl<TaskStatus | ''>('', { nonNullable: true });
   readonly priorityFilter = new FormControl<TaskPriority | ''>('', { nonNullable: true });
+
+  get hasActiveFilters(): boolean {
+    return Boolean(
+      this.searchControl.value.trim() || this.statusFilter.value || this.priorityFilter.value,
+    );
+  }
 
   constructor() {
     // La recherche attend 300 ms après la dernière frappe avant d'appeler l'API
@@ -96,6 +107,18 @@ export class TaskList implements OnInit {
     this.loadTasks();
   }
 
+  statusIcon(status: TaskStatus): string {
+    switch (status) {
+      case 'TODO':
+        return 'schedule';
+      case 'IN_PROGRESS':
+        return 'pending';
+      case 'DONE':
+        return 'check_circle';
+    }
+    return 'schedule';
+  }
+
   loadTasks(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -115,7 +138,9 @@ export class TaskList implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.errorMessage.set('Impossible de charger les tâches. Le serveur est-il démarré ?');
+          const message = 'Impossible de charger les tâches. Le serveur est-il démarré ?';
+          this.errorMessage.set(message);
+          this.notifications.error(message);
           this.loading.set(false);
         },
       });
@@ -141,11 +166,11 @@ export class TaskList implements OnInit {
 
         call.subscribe({
           next: () => {
-            this.notify(task ? 'Tâche modifiée' : 'Tâche créée');
+            this.notifications.success(task ? 'Tâche modifiée' : 'Tâche créée');
             if (!task) this.pageIndex.set(0);
             this.loadTasks();
           },
-          error: () => this.notify("L'enregistrement a échoué"),
+          error: () => this.notifications.error("L'enregistrement a échoué"),
         });
       });
   }
@@ -154,29 +179,37 @@ export class TaskList implements OnInit {
     this.taskApi.updateStatus(task.id, status).subscribe({
       next: (updated) => {
         this.tasks.update((list) => list.map((t) => (t.id === updated.id ? updated : t)));
-        this.notify('Statut mis à jour');
+        this.notifications.success('Statut mis à jour');
       },
-      error: () => this.notify('Le changement de statut a échoué'),
+      error: () => this.notifications.error('Le changement de statut a échoué'),
     });
   }
 
   deleteTask(task: Task): void {
-    if (!confirm(`Supprimer la tâche « ${task.title} » ?`)) return;
+    this.dialog
+      .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+        data: {
+          title: 'Supprimer cette tâche ?',
+          message: `Supprimer la tâche « ${task.title} » ?`,
+        },
+        width: '400px',
+        maxWidth: '95vw',
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed !== true) return;
 
-    this.taskApi.delete(task.id).subscribe({
-      next: () => {
-        this.tasks.update((list) => list.filter((t) => t.id !== task.id));
-        if (this.tasks().length === 0 && this.pageIndex() > 0) {
-          this.pageIndex.update((page) => page - 1);
-        }
-        this.notify('Tâche supprimée');
-        this.loadTasks();
-      },
-      error: () => this.notify('La suppression a échoué'),
-    });
-  }
-
-  private notify(message: string): void {
-    this.snackBar.open(message, 'OK', { duration: 3000 });
+        this.taskApi.delete(task.id).subscribe({
+          next: () => {
+            this.tasks.update((list) => list.filter((t) => t.id !== task.id));
+            if (this.tasks().length === 0 && this.pageIndex() > 0) {
+              this.pageIndex.update((page) => page - 1);
+            }
+            this.notifications.success('Tâche supprimée');
+            this.loadTasks();
+          },
+          error: () => this.notifications.error('La suppression a échoué'),
+        });
+      });
   }
 }
