@@ -1,0 +1,17 @@
+.secondary-message {
+  margin-bottom: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.confirm-button {
+  color: var(--mat-sys-on-error);
+  background-color: var(--mat-sys-error);
+}
+
+.confirm-button:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--mat-sys-error) 88%,
+    var(--mat-sys-on-error)
+  );
+}

@@ -1,0 +1,11 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<mat-dialog-content>
+  <p>{{ message }}</p>
+  <p class="secondary-message">Cette action est irréversible.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button cdkFocusInitial (click)="cancel()">{{ cancelLabel }}</button>
+  <button mat-flat-button class="confirm-button" (click)="confirm()">{{ confirmLabel }}</button>
+</mat-dialog-actions>
