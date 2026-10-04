@@ -1,0 +1,9 @@
+<div class="notification-content" [class.notification-success]="data.type === 'success'"
+  [class.notification-error]="data.type === 'error'"
+  [class.notification-info]="data.type === 'info'">
+  <mat-icon class="notification-icon" aria-hidden="true">{{ icon }}</mat-icon>
+  <span class="notification-message">{{ data.message }}</span>
+  <button mat-icon-button aria-label="Fermer" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
