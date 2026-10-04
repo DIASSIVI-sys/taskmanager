@@ -9,6 +9,10 @@ html {
 
 body {
   min-width: 320px;
+  margin: 0;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
 }
 
 button:focus-visible,
@@ -38,32 +42,16 @@ textarea:focus-visible,
   font-size: 16px;
 }
 
+.priority-low,
 .status-done {
   color: var(--mat-sys-on-tertiary-container);
   background: color-mix(in srgb, var(--mat-sys-tertiary-container) 78%, var(--mat-sys-surface));
 }
 
+.priority-medium,
 .status-in-progress {
   color: var(--mat-sys-on-secondary-container);
   background: color-mix(in srgb, var(--mat-sys-secondary-container) 78%, var(--mat-sys-surface));
-}
-
-.priority-low {
-  color: oklch(from var(--mat-sys-on-tertiary-container) l c 145);
-  background: color-mix(
-    in srgb,
-    oklch(from var(--mat-sys-tertiary-container) l c 145) 78%,
-    var(--mat-sys-surface)
-  );
-}
-
-.priority-medium {
-  color: oklch(from var(--mat-sys-on-secondary-container) l c 55);
-  background: color-mix(
-    in srgb,
-    oklch(from var(--mat-sys-secondary-container) l c 55) 78%,
-    var(--mat-sys-surface)
-  );
 }
 
 .priority-high {

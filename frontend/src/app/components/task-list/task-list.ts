@@ -25,6 +25,7 @@ import {
 } from '../../models/task.model';
 import { TaskApi } from '../../services/task-api';
 import { NotificationService } from '../../services/notification-service';
+import { ThemeService } from '../../services/theme-service';
 import { TaskForm } from '../task-form/task-form';
 import { ConfirmDialog, ConfirmDialogData } from '../confirm-dialog/confirm-dialog';
 
@@ -51,6 +52,7 @@ export class TaskList implements OnInit {
   private readonly taskApi = inject(TaskApi);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
+  readonly theme = inject(ThemeService);
 
   readonly tasks = signal<Task[]>([]);
   readonly loading = signal(false);

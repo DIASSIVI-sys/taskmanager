@@ -5,10 +5,21 @@
       {{ totalElements() }} {{ totalElements() === 1 ? 'tâche au total' : 'tâches au total' }}
     </p>
   </div>
-  <button mat-flat-button class="new-task-button" (click)="openForm()">
-    <mat-icon>add</mat-icon>
-    Nouvelle tâche
-  </button>
+  <div class="header-actions">
+    <button
+      mat-icon-button
+      class="theme-toggle"
+      [matTooltip]="theme.mode() === 'light' ? 'Mode sombre' : 'Mode clair'"
+      [attr.aria-label]="theme.mode() === 'light' ? 'Activer le mode sombre' : 'Activer le mode clair'"
+      (click)="theme.toggle()"
+    >
+      <mat-icon>{{ theme.mode() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+    <button mat-flat-button class="new-task-button" (click)="openForm()">
+      <mat-icon>add</mat-icon>
+      Nouvelle tâche
+    </button>
+  </div>
 </header>
 
 <div class="loading-track" aria-hidden="true">

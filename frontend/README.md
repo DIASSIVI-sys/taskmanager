@@ -1,59 +1,111 @@
-# Frontend
+# Task Manager : Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.1.
+Interface web de l'application de gestion de tâches, développée avec **Angular 22** (CLI 22.2.1) et **Angular Material**.
 
-## Development server
+Elle communique avec l'API REST Spring Boot du dossier `backend/` (voir le [README principal](../README.md) pour le projet complet).
 
-To start a local development server, run:
+## Fonctionnalités
+
+- Liste paginée des tâches (pagination côté serveur, paginateur en français)
+- Création et modification via un formulaire en dialogue, avec validation
+- Consultation du détail d'une tâche
+- Changement rapide du statut depuis la carte
+- Suppression avec dialogue de confirmation Material
+- Recherche par titre (avec debounce) et filtres par statut et priorité
+- Notifications de succès et d'erreur stylisées
+- États de chargement, d'erreur et de liste vide
+- Interface responsive
+
+## Technologies
+
+- Angular 22 (composants standalone, signals, nouvelle syntaxe `@if` / `@for`)
+- Angular Material (dialogues, formulaires, paginateur, snackbar, barre de chargement)
+- RxJS (`debounceTime`, `distinctUntilChanged`, `takeUntilDestroyed`)
+- Formulaires réactifs
+- Vitest pour les tests unitaires
+
+## Prérequis
+
+- Node.js 20 ou supérieur (développé avec 24.15.0) et npm
+- Angular CLI : `npm install -g @angular/cli`
+- Le backend démarré sur http://localhost:8080 (voir le README principal)
+
+## Installation et lancement
+
+Depuis le dossier `frontend` :
 
 ```bash
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Ouvrir ensuite http://localhost:4200. L'application se recharge automatiquement à chaque modification.
 
-## Code scaffolding
+L'application doit être ouverte via `localhost` : le CORS du backend n'autorise que `http://localhost:4200`.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Configuration de l'API
 
-```bash
-ng generate component component-name
+L'URL de l'API est définie dans `src/app/services/task-api.ts` :
+
+```ts
+private readonly baseUrl = 'http://localhost:8080/api/tasks';
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Pour utiliser un autre backend, modifier cette valeur (et adapter le CORS côté backend). Un fichier d'environnement serait une amélioration possible.
 
-```bash
-ng generate --help
+## Structure
+
+```
+src/app/
+├── components/
+│   ├── task-list/        # Liste, recherche, filtres, pagination
+│   ├── task-form/        # Dialogue de création / modification
+│   ├── task-detail/      # Dialogue de consultation
+│   ├── confirm-dialog/   # Dialogue de confirmation réutilisable
+│   └── notification/     # Notification personnalisée (snackbar)
+├── services/
+│   ├── task-api.ts       # Appels HTTP vers l'API
+│   └── notification-service.ts
+└── models/
+    └── task.model.ts     # Types, enums et libellés français
 ```
 
-## Building
+Principe : les composants n'effectuent jamais d'appels HTTP eux-mêmes, tout passe par `TaskApi`. Les notifications passent par `NotificationService`, ce qui évite d'appeler `MatSnackBar` directement dans les composants.
 
-To build the project run:
+## Tests unitaires
+
+```bash
+ng test --watch=false
+```
+
+Sans `--watch=false`, les tests restent en mode surveillance. Ils couvrent notamment :
+
+- `TaskApi` : méthodes HTTP, paramètres de filtre et de pagination (`HttpTestingController`)
+- `TaskForm` : validation, description vide convertie en `null`
+- `TaskDetail` : affichage des libellés français
+- `ConfirmDialog` et `NotificationService`
+- composants `TaskList` et `App`
+
+## Build de production
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Les fichiers générés sont placés dans `dist/`.
 
-## Running unit tests
+## Commandes utiles
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Commande | Rôle |
+|---|---|
+| `ng serve` | Serveur de développement |
+| `ng test --watch=false` | Lance les tests une fois |
+| `ng build` | Build de production |
+| `ng generate component components/nom` | Génère un composant |
 
-```bash
-ng test
-```
+## Pistes d'amélioration
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- URL de l'API dans un fichier d'environnement
+- Tri des tâches
+- Tests end-to-end
+- Internationalisation complète

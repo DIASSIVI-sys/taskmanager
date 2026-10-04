@@ -12,6 +12,16 @@
   font: var(--mat-sys-headline-medium);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle {
+  color: var(--mat-sys-on-surface-variant);
+}
+
 .page-subtitle {
   margin: 4px 0 0;
   color: var(--mat-sys-on-surface-variant);
@@ -153,11 +163,6 @@
   text-decoration-thickness: 1px;
 }
 
-.task-complete .task-description,
-.task-complete .task-date {
-  opacity: 0.78;
-}
-
 .card-footer {
   margin-top: auto;
   padding-top: 4px;
@@ -262,6 +267,14 @@
 
   .new-task-button {
     width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .new-task-button {
+    flex: 1;
   }
 
   .toolbar {

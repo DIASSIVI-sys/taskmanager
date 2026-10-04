@@ -18,9 +18,9 @@
 }
 
 .notification-success {
-  --notification-accent: oklch(from var(--mat-sys-tertiary) l c 145);
-  --notification-background: oklch(from var(--mat-sys-tertiary-container) l c 145);
-  --notification-foreground: oklch(from var(--mat-sys-on-tertiary-container) l c 145);
+  --notification-accent: var(--mat-sys-tertiary);
+  --notification-background: var(--mat-sys-tertiary-container);
+  --notification-foreground: var(--mat-sys-on-tertiary-container);
 }
 
 .notification-error {
