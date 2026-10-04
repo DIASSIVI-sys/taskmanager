@@ -202,8 +202,6 @@ Tests Vitest : service HTTP (`HttpTestingController`), formulaire (validation, d
 - Dockerisation complète (Backend + Frontend dans le Docker Compose)
 - URL de l'API dans un fichier d'environnement Angular (actuellement en dur dans `TaskApi`)
 - Tests d'intégration avec Testcontainers et tests E2E
-- Drag & drop pour changer le statut, dark mode
-- Pipeline CI/CD
 
 ## Notes
 
