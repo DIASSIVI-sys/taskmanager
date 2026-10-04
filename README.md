@@ -60,7 +60,7 @@ taskmanager/
 ### 1. Cloner le projet
 
 ```bash
-git clone <url-du-depot>
+git clone <https://github.com/DIASSIVI-sys/taskmanager>
 cd taskmanager
 ```
 
